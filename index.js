@@ -1,4 +1,5 @@
-const run = require('./action.js');
+const core = require('@actions/core');
+const { run } = require('./action.js');
 
 run()
   .then(result => {
