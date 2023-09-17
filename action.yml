@@ -1,5 +1,5 @@
 name: 'Upgrade Go Action'
-description: 'Checks if there is an Go upgrade and create an pull requests if so'
+description: 'Check if there is a Go upgrade available, and create a pull request if there is.'
 inputs:
   base-branch:
     description: 'The (base) branch where the PR will be created at. Default is main'
