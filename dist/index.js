@@ -1,6 +1,91 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 973:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const core = __nccwpck_require__(9935);
+const github = __nccwpck_require__(2835);
+const exec = __nccwpck_require__(3409);
+
+async function run() {
+    core.info('Get current (latest) installed Go version');
+    const latestGoVersion = await getGoVersion()
+  
+    core.info('Try to update the "go.mod" file with Go version ' + latestGoVersion);
+    updateGoVersion(latestGoVersion)
+  
+    const changes = detectGitChanges()
+    if (changes) {
+      core.info('Changes detected. Will create a PR')
+  
+      await exec.exec("git config user.name 'github-actions[bot]'");
+      await exec.exec("git config user.email 'github-actions[bot]@users.noreply.github.com'");
+      await exec.exec("git checkout -b go-upgrade-" + latestGoVersion);
+      await exec.exec(`git commit -m "Upgrade Go to version to ` + latestGoVersion + `" .`);
+      await exec.exec("git push origin go-upgrade-" + latestGoVersion);
+  
+      let title = "Upgrade Go version to " + latestGoVersion
+      let head = "go-upgrade-" + latestGoVersion
+      let baseBranch = core.getInput("base-branch")
+  
+      let token = process.env.GITHUB_TOKEN
+      let pullCreateResponse = github.getOctokit(token).rest.pulls.create({
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        title: title,
+        body: "",
+        head: head,
+        base: baseBranch
+      });
+      let prUrl = (await pullCreateResponse).data.html_url
+  
+      core.info('PR created. Check it out at ' + prUrl);
+    } else {
+      core.info('Seems everything is up to date 🎉');
+    }
+}
+  
+async function getGoVersion() {
+    let latestGoVersion;
+    const execOptionsLatesGoVersion = {};
+    execOptionsLatesGoVersion.listeners = {
+      stdout: (data) => {
+        latestGoVersion = data.toString().trim();
+      },
+    };
+    await exec.exec('go version', '', execOptionsLatesGoVersion);
+    await exec.exec(`/bin/bash -c "go version | grep -o \\"go[0-9]\\+\\.[0-9]\\+\\" | cut -c 3-`, '', execOptionsLatesGoVersion);
+  
+    return latestGoVersion
+}
+  
+async function updateGoVersion(goVersion) {
+    await exec.exec('go mod edit -go=' + goVersion);
+    await exec.exec('go mod tidy');
+}
+  
+async function detectGitChanges() {
+    let gitChanges;
+    const execOptionsGitChanges = {};
+    execOptionsGitChanges.listeners = {
+      stdout: (data) => {
+        gitChanges += data.toString();
+      },
+    };
+    await exec.exec('git status -s', '', execOptionsGitChanges);
+    return gitChanges != undefined || gitChanges != ""
+}
+
+module.exports = {
+    run,
+    getGoVersion,
+    updateGoVersion,
+    detectGitChanges
+}
+
+/***/ }),
+
 /***/ 2690:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -558,7 +643,7 @@ class OidcClient {
                 .catch(error => {
                 throw new Error(`Failed to get ID Token. \n 
         Error Code : ${error.statusCode}\n 
-        Error Message: ${error.result.message}`);
+        Error Message: ${error.message}`);
             });
             const id_token = (_a = res.result) === null || _a === void 0 ? void 0 : _a.value;
             if (!id_token) {
@@ -11064,77 +11149,7 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
 const core = __nccwpck_require__(9935);
-const github = __nccwpck_require__(2835);
-const exec = __nccwpck_require__(3409);
-
-async function run() {
-  core.info('Get current (latest) installed Go version');
-  const latestGoVersion = await getGoVersion()
-
-  core.info('Try to update the "go.mod" file with Go version ' + latestGoVersion);
-  updateGoVersion(latestGoVersion)
-
-  const changes = detectGitChanges()
-  if (changes) {
-    core.info('Changes detected. Will create a PR')
-
-    await exec.exec("git config user.name 'github-actions[bot]'");
-    await exec.exec("git config user.email 'github-actions[bot]@users.noreply.github.com'");
-    await exec.exec("git checkout -b go-upgrade-" + latestGoVersion);
-    await exec.exec(`git commit -m "Upgrade Go to version to ` + latestGoVersion + `" .`);
-    await exec.exec("git push origin go-upgrade-" + latestGoVersion);
-
-    let title = "Upgrade Go version to " + latestGoVersion
-    let head = "go-upgrade-" + latestGoVersion
-    let baseBranch = core.getInput("base-branch")
-
-    let token = process.env.GITHUB_TOKEN
-    let pullCreateResponse = github.getOctokit(token).rest.pulls.create({
-      owner: github.context.repo.owner,
-      repo: github.context.repo.repo,
-      title: title,
-      body: "",
-      head: head,
-      base: baseBranch
-    });
-    let prUrl = (await pullCreateResponse).data.html_url
-
-    core.info('PR created. Check it out at ' + prUrl);
-  } else {
-    core.info('Seems everything is up to date 🎉');
-  }
-}
-
-async function getGoVersion() {
-  let latestGoVersion;
-  const execOptionsLatesGoVersion = {};
-  execOptionsLatesGoVersion.listeners = {
-    stdout: (data) => {
-      latestGoVersion = data.toString().trim();
-    },
-  };
-  await exec.exec('go version', '', execOptionsLatesGoVersion);
-  await exec.exec(`/bin/bash -c "go version | grep -o \\"go[0-9]\\+\\.[0-9]\\+\\" | cut -c 3-`, '', execOptionsLatesGoVersion);
-
-  return latestGoVersion
-}
-
-async function updateGoVersion(goVersion) {
-  await exec.exec('go mod edit -go=' + goVersion);
-  await exec.exec('go mod tidy');
-}
-
-async function detectGitChanges() {
-  let gitChanges;
-  const execOptionsGitChanges = {};
-  execOptionsGitChanges.listeners = {
-    stdout: (data) => {
-      gitChanges += data.toString();
-    },
-  };
-  await exec.exec('git status -s', '', execOptionsGitChanges);
-  return gitChanges != undefined || gitChanges != ""
-}
+const { run } = __nccwpck_require__(973);
 
 run()
   .then(result => {
