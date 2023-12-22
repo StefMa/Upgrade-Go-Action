@@ -3,41 +3,42 @@ const github = require('@actions/github');
 const exec = require('@actions/exec');
 
 async function run() {
-    core.info('Get current (latest) installed Go version');
+    core.info('Get current (latest(?)) installed Go version from host');
     const latestGoVersion = await getGoVersion()
   
     core.info('Try to update the "go.mod" file with Go version ' + latestGoVersion);
     updateGoVersion(latestGoVersion)
   
     const changes = detectGitChanges()
-    if (changes) {
-      core.info('Changes detected. Will create a PR')
-  
-      await exec.exec("git config user.name 'github-actions[bot]'");
-      await exec.exec("git config user.email 'github-actions[bot]@users.noreply.github.com'");
-      await exec.exec("git checkout -b go-upgrade-" + latestGoVersion);
-      await exec.exec(`git commit -m "Upgrade Go to version to ` + latestGoVersion + `" .`);
-      await exec.exec("git push origin go-upgrade-" + latestGoVersion);
-  
-      let title = "Upgrade Go version to " + latestGoVersion
-      let head = "go-upgrade-" + latestGoVersion
-      let baseBranch = core.getInput("base-branch")
-  
-      let token = process.env.GITHUB_TOKEN
-      let pullCreateResponse = github.getOctokit(token).rest.pulls.create({
-        owner: github.context.repo.owner,
-        repo: github.context.repo.repo,
-        title: title,
-        body: "",
-        head: head,
-        base: baseBranch
-      });
-      let prUrl = (await pullCreateResponse).data.html_url
-  
-      core.info('PR created. Check it out at ' + prUrl);
-    } else {
-      core.info('Seems everything is up to date 🎉');
+    if (!changes) {
+      core.info('No changes detect.\nSeems everything is up to date 🎉');
+      return
     }
+
+    let githubToken = process.env.GITHUB_TOKEN
+    let repoOwner = github.context.repo.owner
+    let repoName = github.context.repo.repo
+    const branchName = "go-upgrade-" + latestGoVersion
+    const branchAlreadyExist = await branchWithNameAlreadyExist(
+      githubToken,
+      branchName, 
+      repoOwner,
+      repoName
+    )
+    if (branchAlreadyExist) {
+      core.info('Branch with name ' + branchName + ' already exist.\nSeems everything is up to date 🎉');
+      return
+    }
+
+    core.info('Will create a PR')
+    let prUrl = await createPullRequest(
+      githubToken,
+      branchName,
+      repoOwner,
+      repoName,
+      latestGoVersion
+    )
+    core.info('PR created. Check it out at ' + prUrl);
 }
   
 async function getGoVersion() {
@@ -71,9 +72,42 @@ async function detectGitChanges() {
     return gitChanges != undefined || gitChanges != ""
 }
 
+async function branchWithNameAlreadyExist(githubToken, branchName, repoOwner, repoName) {
+  let listBranchesResponse = github.getOctokit(githubToken).rest.repos.listBranches({
+    owner: repoOwner,
+    repo: repoName,
+  })
+  let brancheWithName = (await listBranchesResponse).data.find(item => {
+    return item.name == branchName
+  })
+
+  return brancheWithName != undefined
+}
+
+async function createPullRequest(githubToken, branchName, repoOwner, repoName, latestGoVersion) {
+  await exec.exec("git config user.name 'github-actions[bot]'");
+  await exec.exec("git config user.email 'github-actions[bot]@users.noreply.github.com'");
+  await exec.exec("git checkout -b " + branchName);
+  await exec.exec(`git commit -m "Upgrade Go to version to ` + latestGoVersion + `" .`);
+  await exec.exec("git push origin " + branchName);
+
+  let title = "Upgrade Go version to " + latestGoVersion
+  let baseBranch = core.getInput("base-branch")
+
+  let pullCreateResponse = github.getOctokit(githubToken).rest.pulls.create({
+    owner: repoOwner,
+    repo: repoName,
+    title: title,
+    body: "",
+    head: branchName,
+    base: baseBranch
+  });
+
+  return (await pullCreateResponse).data.html_url
+}
+
 module.exports = {
     run,
     getGoVersion,
-    updateGoVersion,
-    detectGitChanges
+    branchWithNameAlreadyExist
 }
