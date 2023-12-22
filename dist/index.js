@@ -25,9 +25,9 @@ async function run() {
     let repoOwner = github.context.repo.owner
     let repoName = github.context.repo.repo
     const branchName = "go-upgrade-" + latestGoVersion
-    const branchAlreadyExist = branchWithNameAlreadyExist(
-      branchName, 
+    const branchAlreadyExist = await branchWithNameAlreadyExist(
       githubToken,
+      branchName, 
       repoOwner,
       repoName
     )
@@ -37,7 +37,13 @@ async function run() {
     }
 
     core.info('Will create a PR')
-    let prUrl = createPullRequest()
+    let prUrl = await createPullRequest(
+      githubToken,
+      branchName,
+      repoOwner,
+      repoName,
+      latestGoVersion
+    )
     core.info('PR created. Check it out at ' + prUrl);
 }
   
@@ -72,7 +78,7 @@ async function detectGitChanges() {
     return gitChanges != undefined || gitChanges != ""
 }
 
-async function branchWithNameAlreadyExist(branchName, githubToken, repoOwner, repoName) {
+async function branchWithNameAlreadyExist(githubToken, branchName, repoOwner, repoName) {
   let listBranchesResponse = github.getOctokit(githubToken).rest.repos.listBranches({
     owner: repoOwner,
     repo: repoName,
@@ -84,7 +90,7 @@ async function branchWithNameAlreadyExist(branchName, githubToken, repoOwner, re
   return brancheWithName != undefined
 }
 
-async function createPullRequest(branchName, latestGoVersion, repoOwner, repoName) {
+async function createPullRequest(githubToken, branchName, repoOwner, repoName, latestGoVersion) {
   await exec.exec("git config user.name 'github-actions[bot]'");
   await exec.exec("git config user.email 'github-actions[bot]@users.noreply.github.com'");
   await exec.exec("git checkout -b " + branchName);

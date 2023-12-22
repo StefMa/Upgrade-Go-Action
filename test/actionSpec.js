@@ -13,8 +13,8 @@ describe('Action', function () {
     it('should return false because branch does not exist', async function () {
       let token = process.env.GITHUB_TOKEN
       const exist = await branchWithNameAlreadyExist(
-        "branchWillNeverExists!Hopefully", 
         token,
+        "branchWillNeverExists!Hopefully", 
         "StefMa",
         "Upgrade-Go-Action"
       )
@@ -25,8 +25,8 @@ describe('Action', function () {
   it('should return true because main branch exist', async function () {
     let token = process.env.GITHUB_TOKEN
     const exist = await branchWithNameAlreadyExist(
-      "main", 
       token,
+      "main", 
       "StefMa",
       "Upgrade-Go-Action"
     )
