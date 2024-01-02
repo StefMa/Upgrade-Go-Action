@@ -9,7 +9,7 @@ async function run() {
     core.info('Try to update the "go.mod" file with Go version ' + latestGoVersion);
     updateGoVersion(latestGoVersion)
   
-    const changes = detectGitChanges()
+    const changes = await detectGitChanges()
     if (!changes) {
       core.info('No changes detect.\nSeems everything is up to date 🎉');
       return
