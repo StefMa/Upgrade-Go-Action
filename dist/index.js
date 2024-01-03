@@ -67,15 +67,18 @@ async function updateGoVersion(goVersion) {
 }
   
 async function detectGitChanges() {
-    let gitChanges;
+    let gitChanges = '';
     const execOptionsGitChanges = {};
     execOptionsGitChanges.listeners = {
       stdout: (data) => {
+        console.info("Listener output: ")
+        console.info(data.toString())
+        console.info("Listener output end")
         gitChanges += data.toString();
       },
     };
     await exec.exec('git status -s', '', execOptionsGitChanges);
-    return gitChanges != undefined || gitChanges != ""
+    return gitChanges !== ''
 }
 
 async function branchWithNameAlreadyExist(githubToken, branchName, repoOwner, repoName) {
