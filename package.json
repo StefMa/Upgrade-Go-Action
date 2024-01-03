@@ -4,6 +4,7 @@
   "description": "Check if there is a Go upgrade available, and create a pull request if there is.",
   "main": "index.js",
   "scripts": {
+    "build": "ncc build index.js",
     "test": "mocha"
   },
   "author": "Stefan 'StefMa' M. (https://StefMa.guru)",
@@ -22,6 +23,7 @@
     "@actions/github": "^6.0.0"
   },
   "devDependencies": {
-    "mocha": "^10.2.0"
+    "mocha": "^10.2.0",
+    "@vercel/ncc": "^0.38.1"
   }
 }

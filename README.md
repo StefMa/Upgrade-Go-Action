@@ -70,9 +70,10 @@ The (base) branch where the PR will be created against at. Default is main.
 ## Release
 
 1. Checkout the repo (`git clone ...`)
-2. Run `npm install`
-3. Run `ncc build index.js` (`ncc` required to be installed: `npm i -g @vercel/ncc`)
-4. Push to the repo
+2. Install `npm`
+3. Run `npm install`
+4. Run `npm run build`
+5. Push to the repo
 
 ## Developer information links
 
