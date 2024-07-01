@@ -23,7 +23,7 @@
     "@actions/github": "^6.0.0"
   },
   "devDependencies": {
-    "mocha": "^10.4.0",
+    "mocha": "^10.5.2",
     "@vercel/ncc": "^0.38.1"
   }
 }
