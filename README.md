@@ -16,9 +16,6 @@ A Github Action that checks for Go upgrades and modifies the `go.mod` file accor
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-It is required to run the `actions/setup-go` before with the parameters `go-version: '>=[MINIMAL-SUPPORTED-GO-VERSION]'` 
-as well as `check-latest: true` to install the latest Go version on the machine.
-
 ## Why?
 
 It is like [Dependabot](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates) or the [Gradle Wrapper Upgrade Gradle Plugin](https://github.com/gradle/wrapper-upgrade-gradle-plugin).
