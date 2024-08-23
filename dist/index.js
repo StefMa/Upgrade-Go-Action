@@ -62,9 +62,9 @@ async function getGoVersion() {
 }
   
 async function updateGoVersion(goVersion) {
-    const go21Path = tc.find('go', "1.22")
-    await exec.exec(go21Path + '/bin/go mod edit -go=' + goVersion);
-    await exec.exec(go21Path + '/bin/go mod tidy');
+    const go22Path = tc.find('go', "1.22")
+    await exec.exec(go22Path + '/bin/go mod edit -go=' + goVersion);
+    await exec.exec(go22Path + '/bin/go mod tidy');
 }
   
 async function detectGitChanges() {
