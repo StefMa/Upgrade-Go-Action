@@ -4,11 +4,15 @@ const exec = require('@actions/exec');
 const tc = require('@actions/tool-cache');
 
 async function run() {
+    const go22 = tc.find('go', "1.22")
+    const go22Path = `${go22}/bin/go`
+
     core.info('Get current (latest(?)) installed Go version from host');
-    const latestGoVersion = await getGoVersion()
+    var latestGoVersion = await getGoVersion()
+    latestGoVersion = await fixLatestVersion(latestGoVersion, go22Path)
   
-    core.info('Try to update the "go.mod" file with Go version ' + latestGoVersion);
-    await updateGoVersion(latestGoVersion)
+    core.info('Try to update the "go.mod" file with Go version ' + latestGoVersion)
+    await updateGoVersion(latestGoVersion, go22Path)
   
     const changes = await detectGitChanges()
     if (!changes) {
@@ -54,22 +58,34 @@ async function getGoVersion() {
   const goVersion = version.replace('go', '');
   return goVersion;
 }
+
+// Respect users that don't use the .Patch version style
+// Example: 1.23.0 -> 1.23
+async function fixLatestVersion(latestGoVersion, goVersionToUpdateModFile) {
+  const goModOutput = await exec.getExecOutput(goVersionToUpdateModFile, ["mod", "edit", "-json"])
+  const goModJson = JSON.parse(goModOutput.stdout)
+  const currentGoModVersion = goModJson.Go
+
+  if (currentGoModVersion.split('.').length == 2) {
+    latestGoVersion = latestGoVersion.slice(0, -2)
+  }
+  return latestGoVersion
+}
   
-async function updateGoVersion(goVersion) {
-    const go22Path = tc.find('go', "1.22")
-    await exec.exec(go22Path + '/bin/go mod edit -go=' + goVersion);
-    await exec.exec(go22Path + '/bin/go mod tidy');
+async function updateGoVersion(latestGoVersion, goVersionToUpdateModFile) {
+    await exec.exec(goVersionToUpdateModFile + ' mod edit -go=' + latestGoVersion)
+    await exec.exec(goVersionToUpdateModFile + ' mod tidy')
 }
   
 async function detectGitChanges() {
-    let gitChanges = '';
-    const execOptionsGitChanges = {};
+    let gitChanges = ''
+    const execOptionsGitChanges = {}
     execOptionsGitChanges.listeners = {
       stdout: (data) => {
-        gitChanges += data.toString();
+        gitChanges += data.toString()
       },
     };
-    await exec.exec('git status -s', '', execOptionsGitChanges);
+    await exec.exec('git status -s', '', execOptionsGitChanges)
     return gitChanges !== ''
 }
 
