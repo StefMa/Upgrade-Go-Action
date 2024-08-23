@@ -8,7 +8,7 @@ async function run() {
     const latestGoVersion = await getGoVersion()
   
     core.info('Try to update the "go.mod" file with Go version ' + latestGoVersion);
-    updateGoVersion(latestGoVersion)
+    await updateGoVersion(latestGoVersion)
   
     const changes = await detectGitChanges()
     if (!changes) {
