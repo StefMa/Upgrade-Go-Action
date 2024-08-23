@@ -18,11 +18,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Install "old" Go version for testing
-      - uses: actions/setup-go@v5
-        with:
-          go-version: '1.21' 
-
       - name: Setup test project
         run: |
           go mod init github.com/Upgrade-Go-Action

@@ -1,6 +1,7 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 const exec = require('@actions/exec');
+const tc = require('@actions/tool-cache');
 
 async function run() {
     core.info('Get current (latest(?)) installed Go version from host');
@@ -55,8 +56,9 @@ async function getGoVersion() {
 }
   
 async function updateGoVersion(goVersion) {
-    await exec.exec('go mod edit -go=' + goVersion);
-    await exec.exec('go mod tidy');
+    const go22Path = tc.find('go', "1.22")
+    await exec.exec(go22Path + '/bin/go mod edit -go=' + goVersion);
+    await exec.exec(go22Path + '/bin/go mod tidy');
 }
   
 async function detectGitChanges() {
