@@ -18,10 +18,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup test project
+      - name: Create test go.mod file
         run: |
-          go mod init github.com/Upgrade-Go-Action
-          go mod tidy
+          echo "module github.com/Upgrade-Go-Action" >> go.mod
+          echo "go 1.17" >> go.mod
           cat go.mod
 
       - name: Test Local Action
