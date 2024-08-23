@@ -17,7 +17,12 @@ async function run() {
   
     const changes = await detectGitChanges()
     if (!changes) {
-      core.info('No changes detect.\nSeems everything is up to date 🎉');
+      core.info('No changes detect.\nSeems everything is up to date 🎉')
+      return
+    }
+
+    if (core.getInput("dry-run") == "true") {
+      core.info('Dry run enabled. Will not create a PR')
       return
     }
 

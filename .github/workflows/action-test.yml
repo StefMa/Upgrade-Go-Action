@@ -31,6 +31,8 @@ jobs:
 
       - name: Test Local Action
         uses: ./
+        with:
+          dry-run: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

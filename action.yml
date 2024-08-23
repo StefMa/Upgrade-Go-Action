@@ -5,6 +5,10 @@ inputs:
     description: 'The (base) branch where the PR will be created at. Default is main'
     required: false
     default: 'main'
+  dry-run:
+    description: 'If true, the action will only check for upgrades and not create a PR. Default is false'
+    required: false
+    default: 'false'
 runs:
   using: 'node20'
   main: 'dist/index.js'
