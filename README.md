@@ -9,10 +9,6 @@ A Github Action that checks for Go upgrades and modifies the `go.mod` file accor
 ## How?
 
 ```yml
-- uses: actions/setup-go@v4
-  with:
-    go-version: '>=1.20'
-    check-latest: true
 - uses: StefMa/Upgrade-Go-Action@main
   with:
     base-branch: 'master' # Defaults to 'main' if absent
@@ -49,10 +45,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-go@v4
-        with:
-          go-version: '>=1.20'
-          check-latest: true
       - uses: StefMa/Upgrade-Go-Action@main
         with:
           base-branch: 'master'
