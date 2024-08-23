@@ -48,17 +48,11 @@ async function run() {
 }
   
 async function getGoVersion() {
-    let latestGoVersion;
-    const execOptionsLatesGoVersion = {};
-    execOptionsLatesGoVersion.listeners = {
-      stdout: (data) => {
-        latestGoVersion = data.toString().trim();
-      },
-    };
-    await exec.exec('go version', '', execOptionsLatesGoVersion);
-    await exec.exec(`/bin/bash -c "go version | grep -o \\"go[0-9]\\+\\.[0-9]\\+\\" | cut -c 3-`, '', execOptionsLatesGoVersion);
-  
-    return latestGoVersion
+  const response = await fetch('https://go.dev/dl/?mode=json');
+  const data = await response.json();
+  const version = data[0].version;
+  const goVersion = version.replace('go', '');
+  return goVersion;
 }
   
 async function updateGoVersion(goVersion) {
