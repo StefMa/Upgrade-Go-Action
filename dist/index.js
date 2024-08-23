@@ -68,7 +68,7 @@ async function getGoVersion() {
 // Respect users that don't use the .Patch version style
 // Example: 1.23.0 -> 1.23
 async function fixLatestVersion(latestGoVersion, goVersionToUpdateModFile) {
-  const goModOutput = await exec.getExecOutput(goVersionToUpdateModFile, ["mod", "edit", "-json"])
+  const goModOutput = await exec.getExecOutput(goVersionToUpdateModFile, ["mod", "edit", "-json"], {silent: true})
   const goModJson = JSON.parse(goModOutput.stdout)
   const currentGoModVersion = goModJson.Go
 
