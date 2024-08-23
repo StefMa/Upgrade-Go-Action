@@ -71,9 +71,6 @@ async function detectGitChanges() {
     const execOptionsGitChanges = {};
     execOptionsGitChanges.listeners = {
       stdout: (data) => {
-        console.info("Listener output: ")
-        console.info(data.toString())
-        console.info("Listener output end")
         gitChanges += data.toString();
       },
     };
