@@ -9,19 +9,12 @@ A Github Action that checks for Go upgrades and modifies the `go.mod` file accor
 ## How?
 
 ```yml
-- uses: actions/setup-go@v4
-  with:
-    go-version: '>=1.20'
-    check-latest: true
 - uses: StefMa/Upgrade-Go-Action@main
   with:
     base-branch: 'master' # Defaults to 'main' if absent
   env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
-
-It is required to run the `actions/setup-go` before with the parameters `go-version: '>=[MINIMAL-SUPPORTED-GO-VERSION]'` 
-as well as `check-latest: true` to install the latest Go version on the machine.
 
 ## Why?
 
@@ -49,10 +42,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-go@v4
-        with:
-          go-version: '>=1.20'
-          check-latest: true
       - uses: StefMa/Upgrade-Go-Action@main
         with:
           base-branch: 'master'

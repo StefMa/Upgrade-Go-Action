@@ -1,17 +1,27 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 const exec = require('@actions/exec');
+const tc = require('@actions/tool-cache');
 
 async function run() {
-    core.info('Get current (latest(?)) installed Go version from host');
-    const latestGoVersion = await getGoVersion()
+    const go22 = tc.find('go', "1.22")
+    const go22Path = `${go22}/bin/go`
+
+    core.info('Get latest Go version');
+    var latestGoVersion = await getGoVersion()
+    latestGoVersion = await fixLatestVersion(latestGoVersion, go22Path)
   
-    core.info('Try to update the "go.mod" file with Go version ' + latestGoVersion);
-    updateGoVersion(latestGoVersion)
+    core.info('Try to update the "go.mod" file with Go version ' + latestGoVersion)
+    await updateGoVersion(latestGoVersion, go22Path)
   
     const changes = await detectGitChanges()
     if (!changes) {
-      core.info('No changes detect.\nSeems everything is up to date 🎉');
+      core.info('No changes detect.\nSeems everything is up to date 🎉')
+      return
+    }
+
+    if (core.getInput("dry-run") == "true") {
+      core.info('Dry run enabled. Will not create a PR')
       return
     }
 
@@ -42,33 +52,40 @@ async function run() {
 }
   
 async function getGoVersion() {
-    let latestGoVersion;
-    const execOptionsLatesGoVersion = {};
-    execOptionsLatesGoVersion.listeners = {
-      stdout: (data) => {
-        latestGoVersion = data.toString().trim();
-      },
-    };
-    await exec.exec('go version', '', execOptionsLatesGoVersion);
-    await exec.exec(`/bin/bash -c "go version | grep -o \\"go[0-9]\\+\\.[0-9]\\+\\" | cut -c 3-`, '', execOptionsLatesGoVersion);
-  
-    return latestGoVersion
+  const response = await fetch('https://go.dev/dl/?mode=json');
+  const data = await response.json();
+  const version = data[0].version;
+  const goVersion = version.replace('go', '');
+  return goVersion;
+}
+
+// Respect users that don't use the .Patch version style
+// Example: 1.23.0 -> 1.23
+async function fixLatestVersion(latestGoVersion, goVersionToUpdateModFile) {
+  const goModOutput = await exec.getExecOutput(goVersionToUpdateModFile, ["mod", "edit", "-json"], {silent: true})
+  const goModJson = JSON.parse(goModOutput.stdout)
+  const currentGoModVersion = goModJson.Go
+
+  if (currentGoModVersion.split('.').length == 2) {
+    latestGoVersion = latestGoVersion.slice(0, -2)
+  }
+  return latestGoVersion
 }
   
-async function updateGoVersion(goVersion) {
-    await exec.exec('go mod edit -go=' + goVersion);
-    await exec.exec('go mod tidy');
+async function updateGoVersion(latestGoVersion, goVersionToUpdateModFile) {
+    await exec.exec(goVersionToUpdateModFile + ' mod edit -go=' + latestGoVersion)
+    await exec.exec(goVersionToUpdateModFile + ' mod tidy')
 }
   
 async function detectGitChanges() {
-    let gitChanges = '';
-    const execOptionsGitChanges = {};
+    let gitChanges = ''
+    const execOptionsGitChanges = {}
     execOptionsGitChanges.listeners = {
       stdout: (data) => {
-        gitChanges += data.toString();
+        gitChanges += data.toString()
       },
     };
-    await exec.exec('git status -s', '', execOptionsGitChanges);
+    await exec.exec('git status -s', '', execOptionsGitChanges)
     return gitChanges !== ''
 }
 
