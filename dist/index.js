@@ -13,7 +13,7 @@ async function run() {
     const go22 = tc.find('go', "1.22")
     const go22Path = `${go22}/bin/go`
 
-    core.info('Get current (latest(?)) installed Go version from host');
+    core.info('Get latest Go version');
     var latestGoVersion = await getGoVersion()
     latestGoVersion = await fixLatestVersion(latestGoVersion, go22Path)
   
