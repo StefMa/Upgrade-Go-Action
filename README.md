@@ -12,8 +12,7 @@ A Github Action that checks for Go upgrades and modifies the `go.mod` file accor
 - uses: StefMa/Upgrade-Go-Action@main
   with:
     base-branch: 'master' # Defaults to 'main' if absent
-  env:
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    gh-token: {{ secrets.GITHUB_TOKEN }} # Optional. But a custom token can be provided
 ```
 
 ## Why?
@@ -55,6 +54,11 @@ Full a full-reference, checkout the [`action.yml`](action.yml) file.
 
 **base-branch**</br>
 The (base) branch where the PR will be created against at. Default is main.
+
+**gh-token**</br>
+The gh-token that is used to create the pull request. Defaults to `secrets.GITHUB_TOKEN`.
+Please note that actions won't run with that token.
+So a custom token might be desirable.
 
 ## Release
 
