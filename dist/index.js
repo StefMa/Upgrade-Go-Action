@@ -31,7 +31,7 @@ async function run() {
       return
     }
 
-    let githubToken = process.env.GITHUB_TOKEN
+    let githubToken = core.getInput("gh-token", {required: true,})
     let repoOwner = github.context.repo.owner
     let repoName = github.context.repo.repo
     const branchName = "go-upgrade-" + latestGoVersion
