@@ -7,9 +7,12 @@ async function run() {
     const go22 = tc.find('go', "1.22")
     const go22Path = `${go22}/bin/go`
 
+    core.info('Get current Go version in go.mod');
+    var currentGoModVersion = await getCurrentGoModVersion(go22Path)
+
     core.info('Get latest Go version');
     var latestGoVersion = await getGoVersion()
-    latestGoVersion = await fixLatestVersion(latestGoVersion, go22Path)
+    latestGoVersion = await fixLatestVersion(currentGoModVersion, latestGoVersion)
   
     core.info('Try to update the "go.mod" file with Go version ' + latestGoVersion)
     await updateGoVersion(latestGoVersion, go22Path)
@@ -46,6 +49,7 @@ async function run() {
       branchName,
       repoOwner,
       repoName,
+      currentGoModVersion,
       latestGoVersion
     )
     core.info('PR created. Check it out at ' + prUrl);
@@ -59,13 +63,15 @@ async function getGoVersion() {
   return goVersion;
 }
 
-// Respect users that don't use the .Patch version style
-// Example: 1.23.0 -> 1.23
-async function fixLatestVersion(latestGoVersion, goVersionToUpdateModFile) {
+async function getCurrentGoModVersion(goVersionToUpdateModFile) {
   const goModOutput = await exec.getExecOutput(goVersionToUpdateModFile, ["mod", "edit", "-json"], {silent: true})
   const goModJson = JSON.parse(goModOutput.stdout)
-  const currentGoModVersion = goModJson.Go
+  return goModJson.Go
+}
 
+// Respect users that don't use the .Patch version style
+// Example: 1.23.0 -> 1.23
+async function fixLatestVersion(currentGoModVersion, latestGoVersion) {
   if (currentGoModVersion.split('.').length == 2) {
     latestGoVersion = latestGoVersion.slice(0, -2)
   }
@@ -101,21 +107,27 @@ async function branchWithNameAlreadyExist(githubToken, branchName, repoOwner, re
   return brancheWithName != undefined
 }
 
-async function createPullRequest(githubToken, branchName, repoOwner, repoName, latestGoVersion) {
+async function createPullRequest(githubToken, branchName, repoOwner, repoName, currentGoVersion, latestGoVersion) {
   await exec.exec("git config user.name 'github-actions[bot]'");
   await exec.exec("git config user.email 'github-actions[bot]@users.noreply.github.com'");
   await exec.exec("git checkout -b " + branchName);
-  await exec.exec(`git commit -m "Upgrade Go to version to ` + latestGoVersion + `" .`);
+  await exec.exec(`git commit -m "Bump Go to version from ${currentGoVersion} to ${latestGoVersion}" .`);
   await exec.exec("git push origin " + branchName);
 
-  let title = "Upgrade Go version to " + latestGoVersion
+  let latestGoVersionForReleaseNotes = latestGoVersion
+  if (latestGoVersion.split('.').length == 2) {
+    latestGoVersionForReleaseNotes = latestGoVersion + ".0"
+  }
+
+  let title = `Bump Go from ${currentGoVersion} to ${latestGoVersion}`
+  let body = `Bump Go from ${currentGoVersion} to ${latestGoVersion}\n\nRelease notes of Go ${latestGoVersion} can be found here:\nhttps://go.dev/doc/devel/release#go${latestGoVersionForReleaseNotes}`
   let baseBranch = core.getInput("base-branch")
 
   let pullCreateResponse = github.getOctokit(githubToken).rest.pulls.create({
     owner: repoOwner,
     repo: repoName,
     title: title,
-    body: "",
+    body: body,
     head: branchName,
     base: baseBranch
   });
