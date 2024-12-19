@@ -40,12 +40,11 @@ jobs:
   upgrade-go:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: StefMa/Upgrade-Go-Action@main
         with:
           base-branch: 'master'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          gh-token: ${{ secrets.CUSTOM_TOKEN }}
 ```
 
 ## Action Inputs
