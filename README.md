@@ -61,11 +61,12 @@ So a custom token might be desirable.
 
 ## Release
 
-1. Checkout the repo (`git clone ...`)
-2. Install `npm`
-3. Run `npm install`
-4. Run `npm run build`
-5. Push to the repo
+1. Navigate to the [Actions tab](../../actions) in your repository.
+2. Select the ["Create Release" workflow](../../actions/workflows/release.yml).
+3. Click on "Run workflow" and enter the new version number (e.g., `1.2.3`).
+
+The new version tag will be created as well as the **major** tag will be created or updated.
+Also a draft GitHub release will be generated. You can view the releases on the [Releases page](../../releases/latest).
 
 ## Developer information links
 
