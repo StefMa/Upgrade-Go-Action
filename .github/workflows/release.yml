@@ -1,0 +1,68 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'The full semantic version (e.g., 1.2.3)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'latest'
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Update package.json Version
+        run: |
+          npm version ${{ github.event.inputs.version }} --no-git-tag-version
+          git add package.json package-lock.json
+          git commit -m "Update version to ${{ github.event.inputs.version }}"
+          git push origin HEAD
+
+      - name: Extract Major Version
+        id: extract_major
+        run: |
+          MAJOR_VERSION=$(echo "${{ github.event.inputs.version }}" | cut -d'.' -f1)
+          echo "major=v${MAJOR_VERSION}" >> $GITHUB_ENV
+
+      - name: Check if Version Tag Exists
+        id: check_version_tag
+        run: |
+          if git rev-parse "v${{ github.event.inputs.version }}" >/dev/null 2>&1; then
+            echo "Tag v${{ github.event.inputs.version }} already exists!"
+            exit 1
+          fi
+
+      - name: Create Specific Version Tag
+        run: |
+          VERSION="v${{ github.event.inputs.version }}"
+          git tag "$VERSION"
+          git push origin "$VERSION"
+
+      - name: Create or Update Major Tag
+        run: |
+          MAJOR="${{ env.major }}"
+          git tag -f "$MAJOR"
+          git push origin "$MAJOR" --force
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ github.event.inputs.version }}"
+          name: "v${{ github.event.inputs.version }}"
+          draft: true

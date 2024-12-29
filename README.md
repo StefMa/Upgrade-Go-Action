@@ -1,6 +1,7 @@
 # Upgrade Go Action
 
 [![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/StefMa/Upgrade-Go-Action/blob/main/LICENSE)
+[![GitHub Release](https://img.shields.io/github/v/release/stefma/upgrade-go-action?include_prereleases)](https://github.com/StefMa/upgrade-go-action/releases/latest)
 
 ## What?
 
@@ -9,7 +10,7 @@ A Github Action that checks for Go upgrades and modifies the `go.mod` file accor
 ## How?
 
 ```yml
-- uses: StefMa/Upgrade-Go-Action@main
+- uses: StefMa/Upgrade-Go-Action@{latestRelease or main}
   with:
     base-branch: 'master' # Defaults to 'main' if absent
     gh-token: {{ secrets.GITHUB_TOKEN }} # Optional. But a custom token can be provided
@@ -25,7 +26,7 @@ So, why not?
 
 ## Example
 
-A fully working example can bn seen below.
+A fully working example can be seen below.
 It make sense to run this Action periodically to check for new Go versions.
 
 ```yml
@@ -61,11 +62,12 @@ So a custom token might be desirable.
 
 ## Release
 
-1. Checkout the repo (`git clone ...`)
-2. Install `npm`
-3. Run `npm install`
-4. Run `npm run build`
-5. Push to the repo
+1. Navigate to the [Actions tab](../../actions) in your repository.
+2. Select the ["Create Release" workflow](../../actions/workflows/release.yml).
+3. Click on "Run workflow" and enter the new version number (e.g., `1.2.3`).
+
+The new version tag will be created as well as the **major** tag will be created or updated.
+Also a draft GitHub release will be generated. You can view the releases on the [Releases page](../../releases/latest).
 
 ## Developer information links
 
