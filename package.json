@@ -1,6 +1,6 @@
 {
   "name": "upgrade-go-action",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Check if there is a Go upgrade available, and create a pull request if there is.",
   "main": "index.js",
   "scripts": {
