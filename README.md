@@ -40,6 +40,9 @@ on:
 jobs:
   upgrade-go:
     runs-on: ubuntu-latest
+    permissions: # required if using default secrets.GITHUB_TOKEN
+      contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
       - uses: StefMa/Upgrade-Go-Action@main
@@ -47,6 +50,9 @@ jobs:
           base-branch: 'master'
           gh-token: ${{ secrets.CUSTOM_TOKEN }}
 ```
+
+> note
+> Using the default secrets.GITHUB_TOKEN requires to enable "github actions are allowed to create PRs" in the repo settings... 
 
 ## Action Inputs
 
@@ -57,8 +63,7 @@ The (base) branch where the PR will be created against at. Default is main.
 
 **gh-token**</br>
 The gh-token that is used to create the pull request. Defaults to `secrets.GITHUB_TOKEN`.
-Please note that actions won't run with that token.
-So a custom token might be desirable.
+Please note that actions on the created PR won't run with that token. So a custom token might be desired.
 
 ## Release
 
