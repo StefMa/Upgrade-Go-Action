@@ -65,6 +65,7 @@ Please note that actions on the created PR won't run with that token. So a custo
 > [!IMPORTANT]
 > Using the default `secrets.GITHUB_TOKEN` requires enabling 
 > "GitHub Actions are allowed to create PRs" in the repository settings.
+> Settings -> Actions -> General -> (Scroll down) Allow GitHub Actions to create and approve pull requests
 
 ## Release
 
