@@ -13,7 +13,7 @@ A Github Action that checks for Go upgrades and modifies the `go.mod` file accor
 - uses: StefMa/Upgrade-Go-Action@{latestRelease or main}
   with:
     base-branch: 'master' # Defaults to 'main' if absent
-    gh-token: {{ secrets.GITHUB_TOKEN }} # Optional. But a custom token can be provided
+    gh-token: {{ secrets.CUSTOM_TOKEN }} # Optional to provide a custom token
 ```
 
 ## Why?
@@ -40,7 +40,7 @@ on:
 jobs:
   upgrade-go:
     runs-on: ubuntu-latest
-    permissions: # required if using default secrets.GITHUB_TOKEN
+    permissions: # Only required if using default `secrets.GITHUB_TOKEN`
       contents: write
       pull-requests: write
     steps:
@@ -50,9 +50,6 @@ jobs:
           base-branch: 'master'
           gh-token: ${{ secrets.CUSTOM_TOKEN }}
 ```
-
-> note
-> Using the default secrets.GITHUB_TOKEN requires to enable "github actions are allowed to create PRs" in the repo settings... 
 
 ## Action Inputs
 
@@ -64,6 +61,10 @@ The (base) branch where the PR will be created against at. Default is main.
 **gh-token**</br>
 The gh-token that is used to create the pull request. Defaults to `secrets.GITHUB_TOKEN`.
 Please note that actions on the created PR won't run with that token. So a custom token might be desired.
+
+> [!IMPORTANT]
+> Using the default `secrets.GITHUB_TOKEN` requires enabling 
+> "GitHub Actions are allowed to create PRs" in the repository settings.
 
 ## Release
 
