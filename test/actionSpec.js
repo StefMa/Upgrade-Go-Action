@@ -5,7 +5,7 @@ describe('Action', function () {
   describe('#getGoVersion()', function () {
     it('should return latest version', async function () {
       const goVersion = await getGoVersion()
-      assert.equal(goVersion, "1.24.6")
+      assert.equal(goVersion, "1.25.3")
     });
   });
 
